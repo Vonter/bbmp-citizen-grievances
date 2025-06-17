@@ -2,12 +2,12 @@
 
 Dataset of citizen grievances filed on the Sahaaya 2.0 portal by BBMP. Sourced from the [Bengaluru Smart City Limited Website](https://smartoneblr.com/NicApplicationStatus.htm).
 
-Explore the dataset [here](https://hyparam.github.io/demos/hyparquet/?key=https%3A%2F%2Fgithub.com%2FVonter%2Fbbmp-citizen-grievances%2Freleases%2Fdownload%2Fbbmp-citizen-grievances%2Fcitizen-grievances.parquet).
+Explore the dataset [here](https://hyparam.github.io/demos/hyparquet/?key=https%3A%2F%2Fraw.githubusercontent.com%2FVonter%2Fbbmp-citizen-grievances%2Fmain%2Fdata%2Fcitizen-grievances.parquet).
 
 ## Data
 
-* [citizen-grievances.parquet](https://github.com/Vonter/bbmp-trade-license/releases/latest/download/citizen-grievances.parquet): Citizen grievance details such as Grievance Category, Grievance Date, Ward, Grievance Status, as Parquet file.
-* [citizen-grievances.csv.gz](https://github.com/Vonter/bbmp-trade-license/releases/latest/download/citizen-grievances.csv.gz): Citizen grievance details such as Grievance Category, Grievance Date, Ward, Grievance Status, as compressed CSV file.
+* [citizen-grievances.parquet](data/citizen-grievances.parquet): Citizen grievance details such as Grievance Category, Grievance Date, Ward, Grievance Status, as Parquet file.
+* [citizen-grievances.csv.gz](data/citizen-grievances.csv.gz): Citizen grievance details such as Grievance Category, Grievance Date, Ward, Grievance Status, as compressed CSV file.
 
 For more details, refer to the [DATA.md](DATA.md).
 

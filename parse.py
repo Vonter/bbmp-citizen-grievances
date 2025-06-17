@@ -152,7 +152,7 @@ def parse_all_html_files():
     
     # Save final Parquet and compressed CSV
     final_df.to_parquet('data/citizen-grievances.parquet')
-    final_df.to_csv('data/citizen-grievance.csv.gz', compression='gzip', index=False)
+    final_df.to_csv('data/citizen-grievances.csv.gz', compression='gzip', index=False)
     
     logging.info(f"Successfully saved {len(final_df)} records")
 
