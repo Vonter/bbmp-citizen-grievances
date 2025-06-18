@@ -126,7 +126,7 @@ def parse_all_html_files():
     df = pd.DataFrame(existing_data + new_data)
     df['grievance_date'] = pd.to_datetime(df['grievance_date'], format='%d/%m/%Y %H:%M')
     df = df[['complaint_id', 'category', 'sub_category', 'description', 'grievance_date', 'ward_name', 'address', 'grievance_status', 'staff_remarks', 'staff_name', 'contact_details', 'image', 'staff_recent_added_image']]
-    df.sort_values(by='grievance_date', inplace=True, ascending=False)
+    df.sort_values(by='complaint_id', inplace=True, ascending=False)
     df.to_parquet(output_file, index=False)
 
     # Create a copy for the final dataset with renamed columns
@@ -151,7 +151,7 @@ def parse_all_html_files():
     final_df = final_df.drop(columns=columns_to_drop)
     
     # Save final Parquet and compressed CSV
-    final_df.to_parquet('data/citizen-grievances.parquet')
+    final_df.to_parquet('data/citizen-grievances.parquet', index=False)
     final_df.to_csv('data/citizen-grievances.csv.gz', compression='gzip', index=False)
     
     logging.info(f"Successfully saved {len(final_df)} records")
