@@ -8,12 +8,25 @@ from pathlib import Path
 from bs4 import BeautifulSoup
 
 def load_ids(file_path, data_key=None):
-    """Load IDs already fetched"""
+    """Load IDs already fetched, excluding recently Registered complaints that need to be refetched"""
     try:
         df = pd.read_parquet(file_path)
-        ids = set(int(str(cid)) for cid in df[data_key].dropna())
-        print(f"Loaded {len(ids)} IDs from {file_path}")
-        return ids
+        
+        # Get the 50,000 most recent grievances
+        df['Grievance Date'] = pd.to_datetime(df['Grievance Date'])
+        recent_df = df.nlargest(50000, 'Grievance Date')
+        
+        # Get IDs to exclude (registered complaints in recent set)
+        registered_ids = set(int(str(cid)) for cid in recent_df[
+            recent_df['Grievance Status'] == 'Registered'][data_key].dropna())
+        
+        # Get all other IDs that don't need refetching
+        all_ids = set(int(str(cid)) for cid in df[data_key].dropna())
+        final_ids = all_ids - registered_ids
+        
+        print(f"Loaded {len(final_ids)} IDs from {file_path}")
+        print(f"Excluded {len(registered_ids)} recently Registered complaints that need to be refetched")
+        return final_ids
     except Exception as e:
         print(f"Error loading {file_path}: {e}")
         return set()
