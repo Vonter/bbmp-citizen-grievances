@@ -79,7 +79,7 @@ def fetch_complaint_details():
         "searchBy": "refNoDiv^", "mobNum": ""
     }
     
-    while complaint_id < 21000000:
+    while complaint_id < 22000000:
         if should_skip(complaint_id, existing_ids, failed_ids):
             consecutive_invalid = 0
             complaint_id += 1
