@@ -13,13 +13,9 @@ For more details, refer to the [DATA.md](DATA.md).
 
 ## Visualizations
 
-#### Top wards
+### GBA Report Card
 
-![](viz/wards.png)
-
-#### Top categories
-
-![](viz/categories.png)
+[![GBA Report Card](viz/gba-report-card.jpg)](https://urbanuru.in/gba-report-card)
 
 ## Scripts
 
