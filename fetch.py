@@ -51,46 +51,53 @@ def ids_from_list_data(data):
 
 
 def load_parquet_ids():
-    """Return (all_ids, non_terminal_ids) from the existing parquet."""
+    """Return (all_ids, non_terminal_ids, latest_month) from the existing parquet."""
     try:
-        df = pd.read_parquet(PARQUET_PATH, columns=["complaint_id", "grievance_status"])
-        all_ids = set(df["complaint_id"].dropna().astype(int))
+        df = pd.read_parquet(PARQUET_PATH, columns=["complaint_id", "grievance_status", "grievance_date"])
+        ids = df["complaint_id"].dropna().astype(int)
+        all_ids = set(ids)
         non_terminal_ids = set(
             df[~df["grievance_status"].str.lower().isin(TERMINAL_STATUSES)]["complaint_id"].dropna().astype(int)
         )
-        return all_ids, non_terminal_ids
+        latest_date = df.loc[ids.idxmax(), "grievance_date"] if len(ids) else pd.NaT
+        this_month = date.today().strftime("%Y-%m")
+        # IDs are sequential, so the highest one is the newest complaint; dates alone include typo'd future years
+        latest_month = this_month if pd.isna(latest_date) else min(latest_date.strftime("%Y-%m"), this_month)
+        return all_ids, non_terminal_ids, latest_month
     except Exception as e:
         print(f"Error loading parquet: {e}")
-        return set(), set()
+        return set(), set(), ""
 
 
-def fetch_lists(refetch_ids=frozenset()):
+def fetch_lists(refetch_ids=frozenset(), latest_month=""):
     list_dir = Path("raw/list")
     list_dir.mkdir(parents=True, exist_ok=True)
 
     session = requests.Session()
-    today = date.today()
+    latest_month = latest_month or date.today().strftime("%Y-%m")
+    print(f"Refetching lists from {latest_month} onwards")
     all_ids = set()
 
     for year, month in month_iter():
-        filename = list_dir / f"{year:04d}-{month:02d}.json"
-        is_current = (year == today.year and month == today.month)
+        stem = f"{year:04d}-{month:02d}"
+        filename = list_dir / f"{stem}.json"
+        may_be_partial = stem >= latest_month
 
         cached_data = json.loads(filename.read_text()) if filename.exists() else {}
         cached_ids = ids_from_list_data(cached_data)
         needs_refetch = bool(cached_ids & refetch_ids)
 
-        if cached_data and not is_current and not needs_refetch:
+        if cached_data and not may_be_partial and not needs_refetch:
             print(f"Loaded {year}-{month:02d}: {len(cached_ids)} grievances")
             all_ids |= cached_ids
             continue
 
-        if is_current:
-            reason = "current month"
-        elif needs_refetch:
-            reason = "has non-terminal IDs"
-        else:
+        if not cached_data:
             reason = "not cached"
+        elif may_be_partial:
+            reason = "possibly partial"
+        else:
+            reason = "has non-terminal IDs"
         print(f"Fetching list for {year}-{month:02d} ({reason})...")
         try:
             data = fetch_list_for_month(year, month, session)
@@ -163,7 +170,7 @@ if __name__ == "__main__":
                         help="Refetch list files and details for non-terminal grievances")
     args = parser.parse_args()
 
-    all_ids, non_terminal_ids = load_parquet_ids()
+    all_ids, non_terminal_ids, latest_month = load_parquet_ids()
     refetch_ids = non_terminal_ids if args.refetch else frozenset()
     existing_ids = all_ids - refetch_ids
 
@@ -172,5 +179,5 @@ if __name__ == "__main__":
     else:
         print(f"Loaded {len(all_ids)} existing IDs")
 
-    grievance_ids = fetch_lists(refetch_ids=refetch_ids)
+    grievance_ids = fetch_lists(refetch_ids=refetch_ids, latest_month=latest_month)
     fetch_complaint_details(grievance_ids, existing_ids=existing_ids, refetch_ids=refetch_ids)
